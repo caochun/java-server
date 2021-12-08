@@ -1,38 +1,37 @@
 package reactor.client;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import reactor.Server;
 
-public class BasicClient {
+public class FileClient {
 
     public static void main(String[] args) {
         ObjectOutputStream out;
-        ObjectInputStream in;
+        InputStreamReader in;
 
         try (Socket socket = new Socket();) {
             socket.connect(new InetSocketAddress("localhost", Server.SERVER_PORT));
             if (socket.isConnected()) {
                 out = new ObjectOutputStream(socket.getOutputStream());
-                in = new ObjectInputStream(socket.getInputStream());
+                in = new InputStreamReader(socket.getInputStream());
 
                 out.writeObject("Hello!");
                 out.flush();
-                Object s;
-                if ((s = in.readObject()) != null) {
-                    System.out.print(s);
+                int s;
+                while ((s = in.read()) != -1) {
+                    System.out.print((char) s);
                 }
                 out.close();
                 in.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
         }
     }
+
 }

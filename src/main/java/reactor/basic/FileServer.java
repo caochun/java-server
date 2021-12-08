@@ -1,15 +1,16 @@
 package reactor.basic;
 
 import java.io.EOFException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import reactor.Server;
 
-public class IOServer implements Server {
+public class FileServer implements Server {
 
     public static void main(String[] args) throws Exception {
 
@@ -25,7 +26,7 @@ public class IOServer implements Server {
 
         Socket socket;
         ObjectInputStream in;
-        ObjectOutputStream out;
+        OutputStreamWriter out;
 
         public Work(Socket socket) {
             this.socket = socket;
@@ -35,18 +36,23 @@ public class IOServer implements Server {
         public void run() {
             try {
                 in = new ObjectInputStream(socket.getInputStream());
-                out = new ObjectOutputStream(socket.getOutputStream());
+                out = new OutputStreamWriter(socket.getOutputStream());
 
-                Object obj;
-                while ((obj = in.readObject()) != null) {
-                    System.out.println(obj);
-                    Thread.sleep(1000);
-                    out.writeObject("OK");
-                    out.flush();
+                if (in.readObject() != null) {
+                    System.out.println("sending file");
+                    FileReader fr = new FileReader("char_table.txt");
+                    int i;
+                    while ((i = fr.read()) != -1) {
+                        out.write((char) i);
+                    }
+                    fr.close();
+
                 }
+
+                out.flush();
+
             } catch (EOFException e) {
                 try {
-                    out.writeObject("DONE");
                     out.flush();
                 } catch (IOException e1) {
                     e1.printStackTrace();
@@ -54,8 +60,6 @@ public class IOServer implements Server {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
                 try {
