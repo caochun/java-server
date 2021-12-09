@@ -8,7 +8,14 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Set;
 
+import server.Server;
+
 public class Reactor implements Runnable {
+
+    public static void main(String[] args) throws IOException{
+        new Thread(new Reactor(Server.SERVER_PORT)).start();
+    }
+    
     private final Selector selector;
     private final ServerSocketChannel serverSocket;
 
